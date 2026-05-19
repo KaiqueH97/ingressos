@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Usuários - Sistema de Ingressos</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 900px; margin: auto; }
+        .card { background: white; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1, h3 { color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        
+        /* Estilos dos Botões */
+        button, .btn { padding: 10px 15px; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; text-decoration: none;}
+        .btn-success { background-color: #28a745; }
+        .btn-warning { background-color: #ffc107; color: #333; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+        /* Estilos da Tabela */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; color: #333; }
+        tr:hover { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sistema de Venda de Ingressos</h1>
+
+    <div class="card">
+        <h3>Cadastrar Novo Usuário</h3>
+        <form action="/usuarios-html/salvar" method="POST">
+            <div class="form-group">
+                <label>Nome do Usuário:</label>
+                <input type="text" name="nomeUsuario" required placeholder="Digite o nome completo">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" name="email" required placeholder="email@exemplo.com">
+            </div>
+            <div class="form-group">
+                <label>Telefone:</label>
+                <input type="text" name="telefone" placeholder="(11) 99999-9999">
+            </div>
+            <button type="submit" class="btn-success">Salvar Usuário</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3>Usuários Cadastrados</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaUsuarios">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" id="cardEdicao" style="display: none; border: 2px solid #ffc107;">
+        <h3>Atualizar Usuário Selecionado</h3>
+        <form action="/usuarios-html/atualizar" method="POST">
+            <input type="hidden" name="idUsuario" id="updIdUsuario">
+            
+            <div class="form-group">
+                <label>Nome do Usuário:</label>
+                <input type="text" name="nomeUsuario" id="updNome" required>
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" name="email" id="updEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Telefone:</label>
+                <input type="text" name="telefone" id="updTelefone">
+            </div>
+            <button type="submit" class="btn-warning">Confirmar Atualização</button>
+            <button type="button" class="btn" style="background-color: #6c757d;" onclick="cancelarEdicao()">Cancelar</button>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    // Assim que a página abre, ela chama a função para buscar os dados
+    document.addEventListener("DOMContentLoaded", carregarUsuarios);
+
+    // Vai no Java, busca os dados em JSON e desenha as linhas da tabela
+    function carregarUsuarios() {
+        fetch('/usuarios-html/listar')
+            .then(response => response.json())
+            .then(usuarios => {
+                const tbody = document.getElementById('tabelaUsuarios');
+                tbody.innerHTML = ''; // Limpa a tabela antes de preencher
+
+                usuarios.forEach(user => {
+                    // Trata o telefone caso esteja nulo no banco
+                    const telefone = user.telefone ? user.telefone : '-';
+                    
+                    // Cria uma nova linha para cada usuário
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${user.idUsuario}</td>
+                            <td>${user.nomeUsuario}</td>
+                            <td>${user.email}</td>
+                            <td>${telefone}</td>
+                            <td>
+                                <button onclick="prepararEdicao(${user.idUsuario}, '${user.nomeUsuario}', '${user.email}', '${telefone}')" class="btn-warning btn-sm">Editar</button>
+                                
+                                <form action="/usuarios-html/excluir" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir o usuário ${user.nomeUsuario}?');">
+                                    <input type="hidden" name="idUsuario" value="${user.idUsuario}">
+                                    <button type="submit" class="btn-danger btn-sm">Excluir</button>
+                                </form>
+                            </td>
+                        </tr>
+                    `;
+                });
+            })
+            .catch(error => console.error("Erro ao carregar usuários:", error));
+    }
+
+    // Pega os dados da linha clicada, joga no formulário e exibe ele
+    function prepararEdicao(id, nome, email, telefone) {
+        document.getElementById('updIdUsuario').value = id;
+        document.getElementById('updNome').value = nome;
+        document.getElementById('updEmail').value = email;
+        document.getElementById('updTelefone').value = telefone === '-' ? '' : telefone;
+        
+        document.getElementById('cardEdicao').style.display = 'block';
+        
+        // Rola a página para baixo até o formulário de edição
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    // Esconde o formulário de edição
+    function cancelarEdicao() {
+        document.getElementById('cardEdicao').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
