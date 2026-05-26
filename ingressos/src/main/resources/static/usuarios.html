@@ -5,26 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciamento de Usuários - Sistema de Ingressos</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        /* Tipografia e Fundo mais modernos */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #e9ecef; color: #343a40; }
         .container { max-width: 900px; margin: auto; }
-        .card { background: white; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h1, h3 { color: #333; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
         
-        /* Estilos dos Botões */
-        button, .btn { padding: 10px 15px; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; text-decoration: none;}
-        .btn-success { background-color: #28a745; }
-        .btn-warning { background-color: #ffc107; color: #333; }
-        .btn-danger { background-color: #dc3545; }
-        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        /* Cartões com sombras suaves e bordas mais arredondadas */
+        .card { background: white; border: none; padding: 25px; margin-bottom: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
+        
+        /* Títulos com nova cor e alinhamento */
+        h1 { color: #2b2d42; text-align: center; border-bottom: 2px solid #edf2f4; padding-bottom: 15px; margin-bottom: 30px; letter-spacing: -0.5px; }
+        h3 { color: #2b2d42; margin-top: 0; font-weight: 600; }
+        
+        /* Inputs com foco elegante */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; color: #2b2d42; }
+        input { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ced4da; border-radius: 6px; transition: border-color 0.3s, box-shadow 0.3s; }
+        input:focus { border-color: #8d99ae; outline: none; box-shadow: 0 0 0 3px rgba(141, 153, 174, 0.2); }
+        
+        /* Botões flat design com efeito de hover */
+        button, .btn { padding: 10px 15px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; text-decoration: none; transition: opacity 0.2s, transform 0.1s;}
+        button:hover, .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-success { background-color: #43aa8b; } /* Verde moderno */
+        .btn-warning { background-color: #f9c74f; color: #2b2d42; } /* Amarelo estiloso */
+        .btn-danger { background-color: #ef233c; } /* Vermelho vibrante */
+        .btn-sm { padding: 6px 12px; font-size: 12px; margin-right: 5px; }
 
-        /* Estilos da Tabela */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f2f2f2; color: #333; }
-        tr:hover { background-color: #f9f9f9; }
+        /* Tabela com cabeçalho escuro e linhas zebradas sutis */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 8px; overflow: hidden; }
+        th, td { border-bottom: 1px solid #dee2e6; padding: 12px 15px; text-align: left; }
+        th { background-color: #2b2d42; color: white; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
+        tr:hover { background-color: #f8f9fa; }
+        
+        /* Rodapé customizado */
+        .footer { text-align: center; margin-top: 40px; margin-bottom: 20px; font-size: 13px; color: #6c757d; }
     </style>
 </head>
 <body>
@@ -68,7 +81,7 @@
         </table>
     </div>
 
-    <div class="card" id="cardEdicao" style="display: none; border: 2px solid #ffc107;">
+    <div class="card" id="cardEdicao" style="display: none; border-left: 4px solid #f9c74f;">
         <h3>Atualizar Usuário Selecionado</h3>
         <form action="/usuarios-html/atualizar" method="POST">
             <input type="hidden" name="idUsuario" id="updIdUsuario">
@@ -90,28 +103,28 @@
         </form>
     </div>
 
+    <div class="footer">
+        Desenvolvido por Kaique Santos
+    </div>
+
 </div>
 
 <script>
-    // Assim que a página abre, ela chama a função para buscar os dados
     document.addEventListener("DOMContentLoaded", carregarUsuarios);
 
-    // Vai no Java, busca os dados em JSON e desenha as linhas da tabela
     function carregarUsuarios() {
         fetch('/usuarios-html/listar')
             .then(response => response.json())
             .then(usuarios => {
                 const tbody = document.getElementById('tabelaUsuarios');
-                tbody.innerHTML = ''; // Limpa a tabela antes de preencher
+                tbody.innerHTML = ''; 
 
                 usuarios.forEach(user => {
-                    // Trata o telefone caso esteja nulo no banco
                     const telefone = user.telefone ? user.telefone : '-';
                     
-                    // Cria uma nova linha para cada usuário
                     tbody.innerHTML += `
                         <tr>
-                            <td>${user.idUsuario}</td>
+                            <td><strong>#${user.idUsuario}</strong></td>
                             <td>${user.nomeUsuario}</td>
                             <td>${user.email}</td>
                             <td>${telefone}</td>
@@ -130,7 +143,6 @@
             .catch(error => console.error("Erro ao carregar usuários:", error));
     }
 
-    // Pega os dados da linha clicada, joga no formulário e exibe ele
     function prepararEdicao(id, nome, email, telefone) {
         document.getElementById('updIdUsuario').value = id;
         document.getElementById('updNome').value = nome;
@@ -139,11 +151,9 @@
         
         document.getElementById('cardEdicao').style.display = 'block';
         
-        // Rola a página para baixo até o formulário de edição
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
-    // Esconde o formulário de edição
     function cancelarEdicao() {
         document.getElementById('cardEdicao').style.display = 'none';
     }
